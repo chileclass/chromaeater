@@ -109,6 +109,10 @@ export function draw() {
 
   ctx.fillStyle = state.player.color;
   ctx.fillRect(state.player.x, state.player.y, state.player.size, state.player.size);
+  // Always outline player to ensure visibility on any background
+  ctx.strokeStyle = 'yellow';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(state.player.x, state.player.y, state.player.size, state.player.size);
 
   state.enemies.forEach(enemy => {
     if (!enemy.active) return;
@@ -130,6 +134,11 @@ export function draw() {
   ctx.moveTo(canvas.width / 2, canvas.height / 2);
   ctx.lineTo(state.mouseX, state.mouseY);
   ctx.stroke();
+  // Center marker
+  ctx.fillStyle = 'rgba(255,255,0,0.7)';
+  ctx.beginPath();
+  ctx.arc(canvas.width / 2, canvas.height / 2, 3, 0, Math.PI * 2);
+  ctx.fill();
 
   ctx.fillStyle = 'white';
   ctx.font = '16px Arial';

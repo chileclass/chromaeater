@@ -34,8 +34,8 @@ export function loadBackgroundImage(url) {
       state.gridRows = img.height;
 
       // Canvas will render scaled background: 1 src px -> 7 screen px
-      const scaledWidth = img.width * state.scale;
-      const scaledHeight = img.height * state.scale;
+      const scaledWidth = Math.max(1, Math.floor(img.width * state.scale));
+      const scaledHeight = Math.max(1, Math.floor(img.height * state.scale));
       canvas.width = scaledWidth;
       canvas.height = scaledHeight;
 
