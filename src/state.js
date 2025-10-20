@@ -14,6 +14,7 @@ export const state = {
   effects: [],
   projectiles: [],
   zoomLevel: 1.5,
+  scale: 7,
 
   colorMode: 'RGB',
   palettes: {
@@ -43,7 +44,8 @@ export const state = {
   mouseY: 0,
   wave: 1,
   score: 0,
-  currentMap: 0,
+  currentMap: -1,
+  mapsList: [],
   backgroundImage: null,
   backgroundGrid: [],
   enemyIdCounter: 0,

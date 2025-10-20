@@ -1,14 +1,25 @@
 import { canvas, mapInfo } from './state.js';
 import { state, getCellWidth, getCellHeight } from './state.js';
 import { debug, isColorSimilar } from './utils.js';
-
-const predefinedMaps = [
-  {
-    name: 'Mapa Test 1',
-    type: 'image',
-    url: 'https://i.ibb.co/93GBxC9z/mapa.png?1'
+/**
+ * New map system: loads from local `maps/` folder.
+ * We expect a `maps/index.json` listing image filenames.
+ */
+async function ensureMapsListLoaded() {
+  if (state.mapsList && state.mapsList.length > 0) return;
+  try {
+    const res = await fetch('./maps/index.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const items = await res.json();
+    state.mapsList = Array.isArray(items) ? items : [];
+    if (state.mapsList.length === 0) {
+      debug('No maps found in maps/index.json');
+    }
+  } catch (e) {
+    debug('No se pudo cargar maps/index.json');
+    state.mapsList = [];
   }
-];
+}
 
 export function drawBackground(ctx) {
   if (state.backgroundImage) {
@@ -35,13 +46,23 @@ export function loadBackgroundImage(url) {
     img.crossOrigin = 'Anonymous';
 
     img.onload = () => {
+      // Grid is exactly the source image pixels
+      state.gridCols = img.width;
+      state.gridRows = img.height;
+
+      // Canvas will render scaled background: 1 src px -> 7 screen px
+      const scaledWidth = img.width * state.scale;
+      const scaledHeight = img.height * state.scale;
+      canvas.width = scaledWidth;
+      canvas.height = scaledHeight;
+
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = state.gridCols;
       tempCanvas.height = state.gridRows;
       const tempCtx = tempCanvas.getContext('2d');
 
       tempCtx.imageSmoothingEnabled = false;
-      tempCtx.drawImage(img, 0, 0, state.gridCols, state.gridRows);
+      tempCtx.drawImage(img, 0, 0);
 
       const imageData = tempCtx.getImageData(0, 0, state.gridCols, state.gridRows);
       const data = imageData.data;
@@ -74,20 +95,32 @@ export function loadBackgroundImage(url) {
   });
 }
 
-export function nextMap() {
+export async function nextMap() {
   state.fallenBlocks.length = 0;
   debug('Bloques caídos limpiados');
 
-  state.currentMap = (state.currentMap + 1) % predefinedMaps.length;
-  const map = predefinedMaps[state.currentMap];
-  debug(`Cambiando a mapa: ${map.name}`);
+  await ensureMapsListLoaded();
+  if (!state.mapsList || state.mapsList.length === 0) {
+    mapInfo.textContent = 'Mapa: No hay mapas locales';
+    throw new Error('No maps available');
+  }
 
-  return loadBackgroundImage(map.url)
+  // Pick random map different from previous if possible
+  let nextIndex = Math.floor(Math.random() * state.mapsList.length);
+  if (state.mapsList.length > 1 && nextIndex === state.currentMap) {
+    nextIndex = (nextIndex + 1) % state.mapsList.length;
+  }
+  state.currentMap = nextIndex;
+  const file = state.mapsList[state.currentMap];
+  const url = `./maps/${file}`;
+  debug(`Cambiando a mapa: ${file}`);
+
+  return loadBackgroundImage(url)
     .then(() => {
-      mapInfo.textContent = `Mapa: ${map.name}`;
+      mapInfo.textContent = `Mapa: ${file}`;
     })
     .catch(error => {
-      mapInfo.textContent = `Mapa: Error (${map.name})`;
+      mapInfo.textContent = `Mapa: Error (${file})`;
       console.error(error);
       throw error;
     });
