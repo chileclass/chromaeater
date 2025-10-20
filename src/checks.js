@@ -81,7 +81,6 @@ export function performManualColorCheck() {
         });
 
         enemy.blocks.splice(i, 1);
-        state.score += 5;
         matchesFound++;
         blocksRemoved++;
         checkVictory(enemy);
@@ -101,7 +100,6 @@ export function performManualColorCheck() {
 export function checkVictory(enemy) {
   if (enemy.blocks.length === 0) {
     enemy.active = false;
-    state.score += 50;
     if (state.enemies.every(e => !e.active)) {
       state.wave++;
       setTimeout(() => {

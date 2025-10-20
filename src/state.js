@@ -43,7 +43,6 @@ export const state = {
   mouseX: 0,
   mouseY: 0,
   wave: 1,
-  score: 0,
   currentMap: -1,
   mapsList: [],
   backgroundImage: null,

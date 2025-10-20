@@ -78,6 +78,33 @@ export function loadBackgroundImage(url) {
   });
 }
 
+function resetPlayerPositionToValidSpot() {
+  // Try center of map first
+  const startX = Math.max(0, Math.floor((canvas.width - state.player.size) / 2));
+  const startY = Math.max(0, Math.floor((canvas.height - state.player.size) / 2));
+  if (canMoveTo(startX, startY)) {
+    state.player.x = startX;
+    state.player.y = startY;
+    return;
+  }
+
+  // Fallback: random sampling to find a walkable spot
+  const maxTries = 2000;
+  for (let i = 0; i < maxTries; i++) {
+    const x = Math.floor(Math.random() * Math.max(1, canvas.width - state.player.size));
+    const y = Math.floor(Math.random() * Math.max(1, canvas.height - state.player.size));
+    if (canMoveTo(x, y)) {
+      state.player.x = x;
+      state.player.y = y;
+      return;
+    }
+  }
+
+  // Last resort: top-left corner inside bounds
+  state.player.x = 0;
+  state.player.y = 0;
+}
+
 export async function nextMap() {
   state.fallenBlocks.length = 0;
   debug('Bloques caídos limpiados');
@@ -99,6 +126,7 @@ export async function nextMap() {
 
   return loadBackgroundImage(url)
     .then(() => {
+      resetPlayerPositionToValidSpot();
       mapInfo.textContent = `Mapa: ${file}`;
     })
     .catch(error => {
