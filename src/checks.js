@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { debug, isColorSimilar } from './utils.js';
+import { debug, isColorSimilar, mixColor } from './utils.js';
 import { getEnemyWidth, getEnemyHeight } from './enemies.js';
 import { getBackgroundColorAt } from './maps.js';
 
@@ -115,18 +115,18 @@ export function checkVictory(enemy) {
 
 export function whitenLastEnemy() {
   if (!state.lastHitEnemy) return;
+  // Gradually lighten towards white by 10%
   state.lastHitEnemy.blocks.forEach(block => {
-    block.color = { r: 255, g: 255, b: 255 };
-    block.painted = false;
+    block.color = mixColor(block.color, { r: 255, g: 255, b: 255 }, 0.1);
+    block.painted = true;
   });
-  state.lastHitEnemy.currentSpeed = state.lastHitEnemy.baseSpeed;
-  state.lastHitEnemy.hasBeenHit = false;
 }
 
 export function blackenLastEnemy() {
   if (!state.lastHitEnemy) return;
+  // Gradually darken towards black by 10%
   state.lastHitEnemy.blocks.forEach(block => {
-    block.color = { r: 0, g: 0, b: 0 };
+    block.color = mixColor(block.color, { r: 0, g: 0, b: 0 }, 0.1);
     block.painted = true;
   });
 }
