@@ -141,16 +141,21 @@ export function draw() {
   drawEffects();
   ctx.restore();
 
-  ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+  // Crosshair at mouse position
+  ctx.save();
+  ctx.translate(0, 0);
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.lineWidth = 1.5;
+  const cx = state.mouseX;
+  const cy = state.mouseY;
+  const size = 8;
   ctx.beginPath();
-  ctx.moveTo(canvas.width / 2, canvas.height / 2);
-  ctx.lineTo(state.mouseX, state.mouseY);
+  ctx.moveTo(cx - size, cy);
+  ctx.lineTo(cx + size, cy);
+  ctx.moveTo(cx, cy - size);
+  ctx.lineTo(cx, cy + size);
   ctx.stroke();
-  // Center marker
-  ctx.fillStyle = 'rgba(255,255,0,0.7)';
-  ctx.beginPath();
-  ctx.arc(canvas.width / 2, canvas.height / 2, 3, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.restore();
 
   ctx.fillStyle = 'white';
   ctx.font = '16px Arial';
