@@ -1,4 +1,4 @@
-import { state } from './state.js';
+import { state, canvas } from './state.js';
 import { debug } from './utils.js';
 
 export function generateRandomShape() {
@@ -89,7 +89,7 @@ export function createEnemy() {
   const pixelWidth = shape.width * blockSize;
   const pixelHeight = shape.height * blockSize;
 
-  const x = Math.random() * (800 - pixelWidth);
+  const x = Math.random() * (canvas.width - pixelWidth);
   const y = Math.random() * 150;
 
   state.enemyIdCounter++;

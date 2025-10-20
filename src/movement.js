@@ -1,4 +1,4 @@
-import { state } from './state.js';
+import { state, canvas } from './state.js';
 import { canMoveTo } from './maps.js';
 
 export function movePlayer() {
@@ -15,6 +15,6 @@ export function movePlayer() {
     state.player.y = newY;
   }
 
-  state.player.x = Math.max(0, Math.min(800 - state.player.size, state.player.x));
-  state.player.y = Math.max(0, Math.min(600 - state.player.size, state.player.y));
+  state.player.x = Math.max(0, Math.min(canvas.width - state.player.size, state.player.x));
+  state.player.y = Math.max(0, Math.min(canvas.height - state.player.size, state.player.y));
 }

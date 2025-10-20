@@ -1,25 +1,9 @@
 import { canvas, mapInfo } from './state.js';
 import { state, getCellWidth, getCellHeight } from './state.js';
 import { debug, isColorSimilar } from './utils.js';
-/**
- * New map system: loads from local `maps/` folder.
- * We expect a `maps/index.json` listing image filenames.
- */
-async function ensureMapsListLoaded() {
-  if (state.mapsList && state.mapsList.length > 0) return;
-  try {
-    const res = await fetch('./maps/index.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const items = await res.json();
-    state.mapsList = Array.isArray(items) ? items : [];
-    if (state.mapsList.length === 0) {
-      debug('No maps found in maps/index.json');
-    }
-  } catch (e) {
-    debug('No se pudo cargar maps/index.json');
-    state.mapsList = [];
-  }
-}
+import { mapsList } from '../maps/index.js';
+// Load maps list from module; keep a state copy for runtime ops
+state.mapsList = Array.isArray(mapsList) ? mapsList.slice() : [];
 
 export function drawBackground(ctx) {
   if (state.backgroundImage) {
@@ -43,7 +27,6 @@ export function loadBackgroundImage(url) {
     debug(`Cargando imagen: ${url}`);
 
     const img = new Image();
-    img.crossOrigin = 'Anonymous';
 
     img.onload = () => {
       // Grid is exactly the source image pixels
@@ -99,7 +82,6 @@ export async function nextMap() {
   state.fallenBlocks.length = 0;
   debug('Bloques caídos limpiados');
 
-  await ensureMapsListLoaded();
   if (!state.mapsList || state.mapsList.length === 0) {
     mapInfo.textContent = 'Mapa: No hay mapas locales';
     throw new Error('No maps available');

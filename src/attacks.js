@@ -1,4 +1,4 @@
-import { state } from './state.js';
+import { state, canvas } from './state.js';
 import { mixColor } from './utils.js';
 import { getEnemyWidth, getEnemyHeight } from './enemies.js';
 
@@ -11,16 +11,16 @@ export function performCurvedSlash() {
 
   const playerCenterX = state.player.x + state.player.size / 2;
   const playerCenterY = state.player.y + state.player.size / 2;
-  const dxMouse = state.mouseX - 800 / 2;
-  const dyMouse = state.mouseY - 600 / 2;
+  const dxMouse = state.mouseX - canvas.width / 2;
+  const dyMouse = state.mouseY - canvas.height / 2;
   const mouseDist = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
   const slashMax = 80;
   const slashRadius = Math.min(mouseDist, slashMax);
   const slashThickness = 10;
 
   const angle = Math.atan2(
-    state.mouseY - 600 / 2,
-    state.mouseX - 800 / 2
+    state.mouseY - canvas.height / 2,
+    state.mouseX - canvas.width / 2
   );
 
   const startAngle = angle - Math.PI / 4;
@@ -89,8 +89,8 @@ export function launchPaintBurst() {
     const playerCenterY = state.player.y + state.player.size / 2;
 
     const angle = Math.atan2(
-      state.mouseY - 600 / 2,
-      state.mouseX - 800 / 2
+      state.mouseY - canvas.height / 2,
+      state.mouseX - canvas.width / 2
     );
     const burstLength = 300;
     const burstWidth = 12;
