@@ -1,5 +1,41 @@
 import { state } from './state.js';
 import { debug } from './utils.js';
+import { update as defaultBehaviorUpdate } from './behaviors/default.js';
+
+async function loadPngShape(url, maxSize = 32) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.onload = () => {
+      // Resize to maxSize bounding box, preserving aspect ratio
+      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      const w = Math.max(1, Math.floor(img.width * scale));
+      const h = Math.max(1, Math.floor(img.height * scale));
+
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      const cx = c.getContext('2d', { willReadFrequently: true });
+      cx.imageSmoothingEnabled = false;
+      cx.drawImage(img, 0, 0, w, h);
+      const data = cx.getImageData(0, 0, w, h).data;
+
+      const blocks = [];
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const i = (y * w + x) * 4;
+          const a = data[i + 3];
+          if (a > 10) {
+            blocks.push({ x, y });
+          }
+        }
+      }
+      resolve({ width: w, height: h, blocks });
+    };
+    img.onerror = () => reject(new Error('Failed to load enemy PNG ' + url));
+    img.src = url;
+  });
+}
 
 export function generateRandomShape() {
   const maxSize = 20;
@@ -116,7 +152,45 @@ export function createEnemy() {
     active: true,
     directionChangeTime: 0,
     randomAngle: Math.random() * Math.PI * 2,
-    hasBeenHit: false
+    hasBeenHit: false,
+    behavior: defaultBehaviorUpdate
+  };
+}
+
+export async function createEnemyFromPng(url, options = {}) {
+  const { width: w, height: h, blocks: pix } = await loadPngShape(url, options.maxSize ?? 32);
+  const blockSize = options.blockSize ?? 6;
+  state.enemyIdCounter++;
+
+  const blocks = pix.map(p => ({
+    color: { r: 255, g: 255, b: 255 },
+    painted: false,
+    relX: p.x,
+    relY: p.y
+  }));
+
+  const pixelWidth = w * blockSize;
+  const pixelHeight = h * blockSize;
+  const x = Math.random() * Math.max(1, (state.worldWidth - pixelWidth));
+  const y = Math.random() * 150;
+
+  return {
+    id: state.enemyIdCounter,
+    x,
+    y,
+    blockWidth: blockSize,
+    blockHeight: blockSize,
+    blocks,
+    shapeWidth: w,
+    shapeHeight: h,
+    baseSpeed: 0.08,
+    currentSpeed: 0.08,
+    fastSpeed: 0.2,
+    active: true,
+    directionChangeTime: 0,
+    randomAngle: Math.random() * Math.PI * 2,
+    hasBeenHit: false,
+    behavior: defaultBehaviorUpdate
   };
 }
 
