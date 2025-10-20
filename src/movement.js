@@ -15,6 +15,6 @@ export function movePlayer() {
     state.player.y = newY;
   }
 
-  state.player.x = Math.max(0, Math.min(canvas.width - state.player.size, state.player.x));
-  state.player.y = Math.max(0, Math.min(canvas.height - state.player.size, state.player.y));
+  state.player.x = Math.max(0, Math.min(state.worldWidth - state.player.size, state.player.x));
+  state.player.y = Math.max(0, Math.min(state.worldHeight - state.player.size, state.player.y));
 }

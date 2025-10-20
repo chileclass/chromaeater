@@ -8,7 +8,8 @@ state.mapsList = Array.isArray(mapsList) ? mapsList.slice() : [];
 export function drawBackground(ctx) {
   if (state.backgroundImage) {
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(state.backgroundImage, 0, 0, canvas.width, canvas.height);
+    // Draw full world (camera transform already applied)
+    ctx.drawImage(state.backgroundImage, 0, 0, state.worldWidth, state.worldHeight);
   }
 }
 
@@ -36,8 +37,7 @@ export function loadBackgroundImage(url) {
       // Canvas will render scaled background: 1 src px -> 7 screen px
       const scaledWidth = Math.max(1, Math.floor(img.width * state.scale));
       const scaledHeight = Math.max(1, Math.floor(img.height * state.scale));
-      canvas.width = scaledWidth;
-      canvas.height = scaledHeight;
+      // Keep canvas as a fixed viewport; scale world dimensions only
       state.worldWidth = scaledWidth;
       state.worldHeight = scaledHeight;
 

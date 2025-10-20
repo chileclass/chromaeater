@@ -1,5 +1,8 @@
 export const canvas = document.getElementById('game');
 export const ctx = canvas.getContext('2d');
+// Fix viewport size; world can be larger/smaller and camera will scroll
+canvas.width = canvas.width; // preserve initial width set in HTML
+canvas.height = canvas.height; // preserve initial height set in HTML
 
 export const hud = document.getElementById('hud');
 export const waveInfo = document.getElementById('waveInfo');

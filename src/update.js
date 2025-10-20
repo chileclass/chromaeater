@@ -22,21 +22,21 @@ export function moveEnemies() {
     if (enemy.x < margin) {
       enemy.x = margin;
       enemy.randomAngle = Math.PI - enemy.randomAngle;
-    } else if (enemy.x > canvas.width - enemyWidth - margin) {
-      enemy.x = canvas.width - enemyWidth - margin;
+    } else if (enemy.x > state.worldWidth - enemyWidth - margin) {
+      enemy.x = state.worldWidth - enemyWidth - margin;
       enemy.randomAngle = Math.PI - enemy.randomAngle;
     }
 
     if (enemy.y < margin) {
       enemy.y = margin;
       enemy.randomAngle = -enemy.randomAngle;
-    } else if (enemy.y > canvas.height - enemyHeight - margin) {
-      enemy.y = canvas.height - enemyHeight - margin;
+    } else if (enemy.y > state.worldHeight - enemyHeight - margin) {
+      enemy.y = state.worldHeight - enemyHeight - margin;
       enemy.randomAngle = -enemy.randomAngle;
     }
 
-    enemy.x = Math.max(0, Math.min(canvas.width - enemyWidth, enemy.x));
-    enemy.y = Math.max(0, Math.min(canvas.height - enemyHeight, enemy.y));
+    enemy.x = Math.max(0, Math.min(state.worldWidth - enemyWidth, enemy.x));
+    enemy.y = Math.max(0, Math.min(state.worldHeight - enemyHeight, enemy.y));
 
     state.enemies.forEach(otherEnemy => {
       if (otherEnemy !== enemy && otherEnemy.active) {

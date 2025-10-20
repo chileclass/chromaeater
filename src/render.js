@@ -100,9 +100,21 @@ export function draw() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
+  // Compute camera such that player stays centered but clamped to world bounds
+  const centerX = state.player.x + state.player.size / 2;
+  const centerY = state.player.y + state.player.size / 2;
+  const halfViewW = (canvas.width / state.zoomLevel) / 2;
+  const halfViewH = (canvas.height / state.zoomLevel) / 2;
+  const camMinX = halfViewW;
+  const camMaxX = Math.max(halfViewW, state.worldWidth - halfViewW);
+  const camMinY = halfViewH;
+  const camMaxY = Math.max(halfViewH, state.worldHeight - halfViewH);
+  const camX = Math.max(camMinX, Math.min(camMaxX, centerX));
+  const camY = Math.max(camMinY, Math.min(camMaxY, centerY));
+
   ctx.translate(canvas.width / 2, canvas.height / 2);
   ctx.scale(state.zoomLevel, state.zoomLevel);
-  ctx.translate(-(state.player.x + state.player.size / 2), -(state.player.y + state.player.size / 2));
+  ctx.translate(-camX, -camY);
 
   drawBackground(ctx);
   drawFallenBlocks(ctx, rgb);
