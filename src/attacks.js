@@ -1,4 +1,5 @@
 import { state, canvas } from './state.js';
+import { screenToWorld } from './utils.js';
 import { mixColor } from './utils.js';
 import { getEnemyWidth, getEnemyHeight } from './enemies.js';
 
@@ -11,17 +12,15 @@ export function performCurvedSlash() {
 
   const playerCenterX = state.player.x + state.player.size / 2;
   const playerCenterY = state.player.y + state.player.size / 2;
-  const dxMouse = state.mouseX - canvas.width / 2;
-  const dyMouse = state.mouseY - canvas.height / 2;
+  const { worldX: aimX, worldY: aimY } = screenToWorld(state.mouseX, state.mouseY);
+  const dxMouse = aimX - (state.player.x + state.player.size / 2);
+  const dyMouse = aimY - (state.player.y + state.player.size / 2);
   const mouseDist = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
   const slashMax = 80;
   const slashRadius = Math.min(mouseDist, slashMax);
   const slashThickness = 10;
 
-  const angle = Math.atan2(
-    state.mouseY - canvas.height / 2,
-    state.mouseX - canvas.width / 2
-  );
+  const angle = Math.atan2(dyMouse, dxMouse);
 
   const startAngle = angle - Math.PI / 4;
   const endAngle = angle + Math.PI / 4;
@@ -88,9 +87,10 @@ export function launchPaintBurst() {
     const playerCenterX = state.player.x + state.player.size / 2;
     const playerCenterY = state.player.y + state.player.size / 2;
 
+    const { worldX: aimX2, worldY: aimY2 } = screenToWorld(state.mouseX, state.mouseY);
     const angle = Math.atan2(
-      state.mouseY - canvas.height / 2,
-      state.mouseX - canvas.width / 2
+      aimY2 - (state.player.y + state.player.size / 2),
+      aimX2 - (state.player.x + state.player.size / 2)
     );
     const burstLength = 300;
     const burstWidth = 12;

@@ -143,7 +143,6 @@ export function draw() {
 
   // Crosshair at mouse position
   ctx.save();
-  ctx.translate(0, 0);
   ctx.strokeStyle = 'rgba(255,255,255,0.85)';
   ctx.lineWidth = 1.5;
   const cx = state.mouseX;
