@@ -18,6 +18,10 @@ function initializeGame() {
   nextMap()
     .then(() => {
       initWave();
+      // Ensure mouse position starts at canvas center for aiming line
+      const rect = document.getElementById('game').getBoundingClientRect();
+      state.mouseX = rect.width / 2;
+      state.mouseY = rect.height / 2;
       loop();
     })
     .catch(error => {

@@ -15,6 +15,8 @@ export const state = {
   projectiles: [],
   zoomLevel: 1.5,
   scale: 7,
+  worldWidth: canvas.width,
+  worldHeight: canvas.height,
 
   colorMode: 'RGB',
   palettes: {
@@ -73,5 +75,5 @@ export const state = {
   keys: {}
 };
 
-export function getCellWidth() { return canvas.width / state.gridCols; }
-export function getCellHeight() { return canvas.height / state.gridRows; }
+export function getCellWidth() { return state.worldWidth / state.gridCols; }
+export function getCellHeight() { return state.worldHeight / state.gridRows; }

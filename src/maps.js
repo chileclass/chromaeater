@@ -38,6 +38,8 @@ export function loadBackgroundImage(url) {
       const scaledHeight = Math.max(1, Math.floor(img.height * state.scale));
       canvas.width = scaledWidth;
       canvas.height = scaledHeight;
+      state.worldWidth = scaledWidth;
+      state.worldHeight = scaledHeight;
 
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = state.gridCols;
@@ -79,9 +81,9 @@ export function loadBackgroundImage(url) {
 }
 
 function resetPlayerPositionToValidSpot() {
-  // Try center of map first
-  const startX = Math.max(0, Math.floor((canvas.width - state.player.size) / 2));
-  const startY = Math.max(0, Math.floor((canvas.height - state.player.size) / 2));
+  // Try center of world first
+  const startX = Math.max(0, Math.floor((state.worldWidth - state.player.size) / 2));
+  const startY = Math.max(0, Math.floor((state.worldHeight - state.player.size) / 2));
   if (canMoveTo(startX, startY)) {
     state.player.x = startX;
     state.player.y = startY;
@@ -91,8 +93,8 @@ function resetPlayerPositionToValidSpot() {
   // Fallback: random sampling to find a walkable spot
   const maxTries = 2000;
   for (let i = 0; i < maxTries; i++) {
-    const x = Math.floor(Math.random() * Math.max(1, canvas.width - state.player.size));
-    const y = Math.floor(Math.random() * Math.max(1, canvas.height - state.player.size));
+    const x = Math.floor(Math.random() * Math.max(1, state.worldWidth - state.player.size));
+    const y = Math.floor(Math.random() * Math.max(1, state.worldHeight - state.player.size));
     if (canMoveTo(x, y)) {
       state.player.x = x;
       state.player.y = y;
