@@ -133,7 +133,7 @@ export function draw() {
 
   ctx.fillStyle = 'white';
   ctx.font = '16px Arial';
-  ctx.fillText(`Puntuación: ${state.score}`, 20, canvas.height - 20);
+  // Score removed
   ctx.fillText(
     `Tolerancia: ${state.toleranceLevels[state.currentTolerance].name}`,
     20,
