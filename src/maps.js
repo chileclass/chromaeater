@@ -1,9 +1,38 @@
 import { canvas, mapInfo } from './state.js';
 import { state, getCellWidth, getCellHeight } from './state.js';
 import { debug, isColorSimilar } from './utils.js';
-import { mapsList } from '../maps/index.js';
-// Load maps list from module; keep a state copy for runtime ops
-state.mapsList = Array.isArray(mapsList) ? mapsList.slice() : [];
+// Attempt to discover PNG maps automatically from the maps/ folder.
+async function ensureMapsListLoaded() {
+  if (state.mapsList && state.mapsList.length > 0) return;
+  // 1) Try directory listing (works with simple servers like `python -m http.server`)
+  try {
+    const res = await fetch('./maps/', { cache: 'no-store' });
+    if (res.ok) {
+      const html = await res.text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const links = Array.from(doc.querySelectorAll('a'));
+      const pngs = links
+        .map(a => a.getAttribute('href') || '')
+        .filter(h => h && !h.endsWith('/') && /\.png$/i.test(h))
+        .map(h => decodeURIComponent(h.split('/').pop()));
+      if (pngs.length > 0) {
+        state.mapsList = pngs;
+        return;
+      }
+    }
+  } catch (_) {
+    // ignore and try fallback
+  }
+  // 2) Fallback: optional maps/index.js module export
+  try {
+    const mod = await import('../maps/index.js');
+    if (mod && Array.isArray(mod.mapsList) && mod.mapsList.length > 0) {
+      state.mapsList = mod.mapsList.slice();
+    }
+  } catch (_) {
+    // no module present
+  }
+}
 
 export function drawBackground(ctx) {
   if (state.backgroundImage) {
@@ -111,6 +140,7 @@ export async function nextMap() {
   state.fallenBlocks.length = 0;
   debug('Bloques caídos limpiados');
 
+  await ensureMapsListLoaded();
   if (!state.mapsList || state.mapsList.length === 0) {
     mapInfo.textContent = 'Mapa: No hay mapas locales';
     throw new Error('No maps available');
