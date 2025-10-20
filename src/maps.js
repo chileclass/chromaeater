@@ -1,6 +1,6 @@
 import { canvas, mapInfo } from './state.js';
 import { state, getCellWidth, getCellHeight } from './state.js';
-import { debug, isColorSimilar } from './utils.js';
+import { debug } from './utils.js';
 // Attempt to discover PNG maps automatically from the maps/ folder.
 async function ensureMapsListLoaded() {
   if (state.mapsList && state.mapsList.length > 0) return;
@@ -221,6 +221,8 @@ export function canMoveTo(x, y) {
 
   return corners.every(corner => {
     const bgColor = getBackgroundColorWithFallenBlocksAt(corner.x, corner.y);
-    return !isColorSimilar(bgColor, { r: 0, g: 0, b: 0 });
+    const isPureBlack = bgColor.r === 0 && bgColor.g === 0 && bgColor.b === 0;
+    const isPureWhite = bgColor.r === 255 && bgColor.g === 255 && bgColor.b === 255;
+    return !(isPureBlack || isPureWhite);
   });
 }
