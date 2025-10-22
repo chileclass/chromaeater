@@ -1,16 +1,17 @@
 import { state } from './state.js';
 import { debug } from './utils.js';
 import { update as defaultBehaviorUpdate } from './behaviors/default.js';
-import { update as frogBehavior } from './behaviors/frog.js'; // <— added import
 
 async function loadPngShape(url, maxSize = 32) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'Anonymous';
     img.onload = () => {
+      // Resize to maxSize bounding box, preserving aspect ratio
       const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
       const w = Math.max(1, Math.floor(img.width * scale));
       const h = Math.max(1, Math.floor(img.height * scale));
+
       const c = document.createElement('canvas');
       c.width = w;
       c.height = h;
@@ -24,7 +25,9 @@ async function loadPngShape(url, maxSize = 32) {
         for (let x = 0; x < w; x++) {
           const i = (y * w + x) * 4;
           const a = data[i + 3];
-          if (a > 10) blocks.push({ x, y });
+          if (a > 10) {
+            blocks.push({ x, y });
+          }
         }
       }
       resolve({ width: w, height: h, blocks });
@@ -43,28 +46,43 @@ export function generateRandomShape() {
   const height = Math.floor(Math.random() * (maxSize - 3)) + 3;
   const totalBlocks = Math.floor(Math.random() * (maxBlocks - minBlocks)) + minBlocks;
 
-  const grid = Array(height).fill().map(() => Array(width).fill(0));
+  const grid = Array(height)
+    .fill()
+    .map(() => Array(width).fill(0));
+
   const startX = Math.floor(Math.random() * width);
   const startY = Math.floor(Math.random() * height);
+
   const blocks = [{ x: startX, y: startY }];
   grid[startY][startX] = 1;
 
   const directions = [
-    { dx: -1, dy: 0 }, { dx: 1, dy: 0 },
-    { dx: 0, dy: -1 }, { dx: 0, dy: 1 },
-    { dx: -1, dy: -1 }, { dx: -1, dy: 1 },
-    { dx: 1, dy: -1 }, { dx: 1, dy: 1 }
+    { dx: -1, dy: 0 },
+    { dx: 1, dy: 0 },
+    { dx: 0, dy: -1 },
+    { dx: 0, dy: 1 },
+    { dx: -1, dy: -1 },
+    { dx: -1, dy: 1 },
+    { dx: 1, dy: -1 },
+    { dx: 1, dy: 1 }
   ];
 
   while (blocks.length < totalBlocks && blocks.length < width * height) {
     const randomBlock = blocks[Math.floor(Math.random() * blocks.length)];
     const shuffledDirections = [...directions].sort(() => Math.random() - 0.5);
-    let added = false;
 
+    let added = false;
     for (const dir of shuffledDirections) {
       const newX = randomBlock.x + dir.dx;
       const newY = randomBlock.y + dir.dy;
-      if (newX >= 0 && newX < width && newY >= 0 && newY < height && grid[newY][newX] === 0) {
+
+      if (
+        newX >= 0 &&
+        newX < width &&
+        newY >= 0 &&
+        newY < height &&
+        grid[newY][newX] === 0
+      ) {
         blocks.push({ x: newX, y: newY });
         grid[newY][newX] = 1;
         added = true;
@@ -77,7 +95,13 @@ export function generateRandomShape() {
         for (const dir of directions) {
           const newX = block.x + dir.dx;
           const newY = block.y + dir.dy;
-          if (newX >= 0 && newX < width && newY >= 0 && newY < height && grid[newY][newX] === 0) {
+          if (
+            newX >= 0 &&
+            newX < width &&
+            newY >= 0 &&
+            newY < height &&
+            grid[newY][newX] === 0
+          ) {
             blocks.push({ x: newX, y: newY });
             grid[newY][newX] = 1;
             added = true;
@@ -87,17 +111,23 @@ export function generateRandomShape() {
         if (added) break;
       }
     }
+
     if (!added) break;
   }
+
   return { blocks, width, height };
 }
 
 export function createEnemy() {
   const shape = generateRandomShape();
   const blockSize = 6;
+
   const pixelWidth = shape.width * blockSize;
+  const pixelHeight = shape.height * blockSize;
+
   const x = Math.random() * Math.max(1, (state.worldWidth - pixelWidth));
   const y = Math.random() * 150;
+
   state.enemyIdCounter++;
 
   const blocks = shape.blocks.map(blockPos => ({
@@ -109,7 +139,8 @@ export function createEnemy() {
 
   return {
     id: state.enemyIdCounter,
-    x, y,
+    x,
+    y,
     blockWidth: blockSize,
     blockHeight: blockSize,
     blocks,
@@ -139,12 +170,14 @@ export async function createEnemyFromPng(url, options = {}) {
   }));
 
   const pixelWidth = w * blockSize;
+  const pixelHeight = h * blockSize;
   const x = Math.random() * Math.max(1, (state.worldWidth - pixelWidth));
   const y = Math.random() * 150;
 
   return {
     id: state.enemyIdCounter,
-    x, y,
+    x,
+    y,
     blockWidth: blockSize,
     blockHeight: blockSize,
     blocks,
@@ -171,40 +204,32 @@ export function getEnemyHeight(enemy) {
 
 export function initWave() {
   state.enemies.length = 0;
-  state.totalSpawned = 0;
-  state.maxEnemies = 50;
-  state.maxActive = 8;
-  state.spawnCooldown = 0;
+  const enemyCount = 2 + Math.floor(state.wave * 0.7);
+  for (let i = 0; i < enemyCount; i++) {
+    let newEnemy;
+    let validPosition = false;
+    let attempts = 0;
 
-  // Spawn initial batch
-  for (let i = 0; i < state.maxActive; i++) {
-    spawnEnemyNearPlayer(i === 0); // first one = frog
+    while (!validPosition && attempts < 50) {
+      newEnemy = createEnemy();
+      validPosition = true;
+
+      for (let j = 0; j < state.enemies.length; j++) {
+        const dx = newEnemy.x - state.enemies[j].x;
+        const dy = newEnemy.y - state.enemies[j].y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        const minDistance =
+          (getEnemyWidth(newEnemy) + getEnemyWidth(state.enemies[j])) * 0.7;
+
+        if (distance < minDistance) {
+          validPosition = false;
+          break;
+        }
+      }
+      attempts++;
+    }
+
+    state.enemies.push(newEnemy);
   }
-
-  debug(`Oleada: ${state.wave} | Máximo: ${state.maxEnemies}`);
+  debug(`Oleada: ${state.wave} | Enemigos: ${enemyCount}`);
 }
-
-function spawnEnemyNearPlayer(isFrog = false) {
-  if (state.totalSpawned >= state.maxEnemies) return;
-
-  const player = state.player;
-  const distance = 150 + Math.random() * 100;
-  const angle = Math.random() * Math.PI * 2;
-
-  const newEnemy = createEnemy();
-  newEnemy.x = player.x + Math.cos(angle) * distance;
-  newEnemy.y = player.y + Math.sin(angle) * distance;
-
-  // Clamp to world limits
-  const maxX = state.worldWidth - getEnemyWidth(newEnemy);
-  const maxY = state.worldHeight ? state.worldHeight - 50 : 150;
-  newEnemy.x = Math.max(0, Math.min(maxX, newEnemy.x));
-  newEnemy.y = Math.max(0, Math.min(maxY, newEnemy.y));
-
-  // Assign Frog to first spawn
-  if (isFrog) newEnemy.behavior = frogBehavior;
-
-  state.enemies.push(newEnemy);
-  state.totalSpawned++;
-}
-
