@@ -90,10 +90,29 @@ export function loadBackgroundImage(url) {
             r: data[index],
             g: data[index + 1],
             b: data[index + 2],
-            used: false
+            used: false,
+            whiteOpacity: 0,         // 0..1 white overlay, keeps original color intact
+            whiteTouched: false,     // once touched, never below minTouchedOpacity
+            whiteFull: false,        // reached 100% white overlay
+            consumingEnemyId: null,  // which enemy is currently consuming (if any)
+            consumeStartTime: 0,     // timestamp when current consumption started
+            initialBoostApplied: false,
+            lastConsumeUpdateTime: 0,
+            decayStartTime: 0,
+            decayStartOpacity: 0
           };
         }
       }
+
+      // Initialize loss tracking and timers
+      state.totalTiles = state.gridCols * state.gridRows;
+      state.whiteFullCount = 0;
+      state.gameOver = false;
+      state.gameStartTime = performance.now();
+      state.nextLossCheckTime = state.gameStartTime + 45000; // skip first 45s
+      state.enemyTileConsumption = {};
+      state.decayingTiles = new Set();
+      state.deadEnemiesQueue = [];
 
       state.backgroundImage = img;
       debug('Cuadrícula procesada exitosamente');

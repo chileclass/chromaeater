@@ -53,4 +53,7 @@ export function update(enemy, state, dtMs = 16) {
       otherEnemy.y -= Math.sin(angle) * pushForce;
     }
   });
+
+  // Mark this enemy type for consumption system
+  if (!enemy.type) enemy.type = 'default';
 }

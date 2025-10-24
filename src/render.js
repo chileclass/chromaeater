@@ -119,6 +119,24 @@ export function draw() {
   drawBackground(ctx);
   drawFallenBlocks(ctx, rgb);
 
+  // White overlay pass: draw per-cell white overlay based on state.backgroundGrid.whiteOpacity
+  // This preserves original background colors and overlays white; draw before entities
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  const cellW = state.worldWidth / state.gridCols;
+  const cellH = state.worldHeight / state.gridRows;
+  for (let row = 0; row < state.gridRows; row++) {
+    for (let col = 0; col < state.gridCols; col++) {
+      const cell = state.backgroundGrid[row][col];
+      if (!cell || !cell.whiteOpacity) continue;
+      if (cell.whiteOpacity <= 0) continue;
+      ctx.globalAlpha = Math.max(0, Math.min(1, cell.whiteOpacity));
+      ctx.fillStyle = 'white';
+      ctx.fillRect(col * cellW, row * cellH, cellW, cellH);
+    }
+  }
+  ctx.restore();
+
   ctx.fillStyle = state.player.color;
   ctx.fillRect(state.player.x, state.player.y, state.player.size, state.player.size);
   // Always outline player to ensure visibility on any background
@@ -137,6 +155,8 @@ export function draw() {
     ctx.strokeStyle = 'rgba(255,255,255,0.3)';
     ctx.strokeRect(enemy.x, enemy.y, getEnemyWidth(enemy), getEnemyHeight(enemy));
   });
+
+  
 
   drawEffects();
   ctx.restore();

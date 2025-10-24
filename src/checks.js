@@ -100,6 +100,13 @@ export function performManualColorCheck() {
 export function checkVictory(enemy) {
   if (enemy.blocks.length === 0) {
     enemy.active = false;
+    // Trigger decay for any tiles this enemy was consuming
+    try {
+      if (state.enemyTileConsumption && state.enemyTileConsumption[enemy.id]) {
+        state.deadEnemiesQueue = state.deadEnemiesQueue || [];
+        state.deadEnemiesQueue.push(enemy.id);
+      }
+    } catch (_) { /* noop */ }
     if (state.enemies.every(e => !e.active)) {
       state.wave++;
       setTimeout(() => {

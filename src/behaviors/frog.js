@@ -86,4 +86,7 @@ export function update(enemy, delta) {
     enemy.randomAngle = angle; // head faces jump direction
     enemy.nextJumpTime = now + jumpDuration + (enemy.runningAway ? 200 : 2000);
   }
+
+  // Ensure type for consumption system
+  enemy.type = 'frog';
 }
