@@ -75,7 +75,33 @@ export const state = {
   darkenEffect: 0,
   DARKEN_DURATION: 15,
 
-  keys: {}
+  keys: {},
+
+  // White overlay/consumption system
+  whiteLossThreshold: 0.8, // configurable loss threshold
+  whiteFullCount: 0,       // number of tiles at 100% white overlay
+  totalTiles: 0,           // total grid tiles for percentage
+  gameOver: false,
+  gameStartTime: 0,
+  nextLossCheckTime: 0,
+
+  // Consumption behavior configuration
+  consumption: {
+    initialDelayMs: 500,      // faster for testing: 0.5s delay before boost
+    initialBoost: 0.25,       // faster for testing: +25% immediate boost
+    // Given two enemy types, keep both the same as requested
+    ratesByType: {            // per-second rates after boost
+      default: 0.5,           // faster for testing
+      frog: 0.5               // same as default per requirement
+    },
+    decayDurationMs: 5000,    // 5s linear decay to minimum
+    minTouchedOpacity: 0.10   // tiles never drop below 10% once touched
+  },
+
+  // Runtime tracking for efficient updates
+  enemyTileConsumption: {},   // enemyId -> Set of "row,col" tile keys
+  decayingTiles: new Set(),   // Set of tile keys currently decaying
+  deadEnemiesQueue: []        // enemyIds that died this frame; processed by update loop
 };
 
 export function getCellWidth() { return state.worldWidth / state.gridCols; }

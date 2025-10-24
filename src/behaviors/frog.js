@@ -15,6 +15,30 @@ export function update(enemy, delta) {
   if (!enemy.jumpCount) enemy.jumpCount = 0;
   if (!enemy.nextJumpTime) enemy.nextJumpTime = 0;
 
+  // General fleeing after being painted
+  if (enemy.hasBeenHit) {
+    enemy.fleeingUntil = now + 1200; // flee for 1.2s
+    enemy.hasBeenHit = false;
+  }
+
+  if (enemy.fleeingUntil && now < enemy.fleeingUntil) {
+    const player = state.player;
+    const dx = enemy.x - player.x;
+    const dy = enemy.y - player.y;
+    const angle = Math.atan2(dy, dx);
+    const fleeSpeed = enemy.fastSpeed;
+    enemy.x += Math.cos(angle) * fleeSpeed;
+    enemy.y += Math.sin(angle) * fleeSpeed;
+    enemy.type = 'frog';
+    return;
+  }
+
+  // If consuming is locked, skip movement entirely but keep type assignment
+  if (enemy.consumeLocked) {
+    enemy.type = 'frog';
+    return;
+  }
+
   // Still resting
   if (enemy.restingTime > now) return;
 
@@ -86,4 +110,7 @@ export function update(enemy, delta) {
     enemy.randomAngle = angle; // head faces jump direction
     enemy.nextJumpTime = now + jumpDuration + (enemy.runningAway ? 200 : 2000);
   }
+
+  // Ensure type for consumption system
+  enemy.type = 'frog';
 }

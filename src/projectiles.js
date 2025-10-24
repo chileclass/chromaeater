@@ -66,6 +66,15 @@ export function updateProjectiles() {
             enemy.hasBeenHit = true;
             enemy.currentSpeed = enemy.fastSpeed;
           }
+          // If projectile kill occurs, mark enemy inactive and trigger decay on its tiles
+          if (enemy.blocks.length === 0 && enemy.active) {
+            enemy.active = false;
+            // queue decay for tiles this enemy was consuming
+            if (state.enemyTileConsumption && state.enemyTileConsumption[enemy.id]) {
+              state.deadEnemiesQueue = state.deadEnemiesQueue || [];
+              state.deadEnemiesQueue.push(enemy.id);
+            }
+          }
         }
 
         p.hitEnemies.add(enemy.id);

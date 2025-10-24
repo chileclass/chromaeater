@@ -122,7 +122,14 @@ export function createEnemy() {
     directionChangeTime: 0,
     randomAngle: Math.random() * Math.PI * 2,
     hasBeenHit: false,
-    behavior: defaultBehaviorUpdate
+    behavior: defaultBehaviorUpdate,
+    // consumption state
+    type: 'default',
+    consumeLocked: false,     // lock movement while consuming
+    consumeTarget: null,      // { row, col }
+    consumeStartTime: 0,
+    lastConsumeTick: 0,
+    fleeingUntil: 0
   };
 }
 
@@ -157,7 +164,14 @@ export async function createEnemyFromPng(url, options = {}) {
     directionChangeTime: 0,
     randomAngle: Math.random() * Math.PI * 2,
     hasBeenHit: false,
-    behavior: defaultBehaviorUpdate
+    behavior: defaultBehaviorUpdate,
+    // consumption state
+    type: 'default',
+    consumeLocked: false,
+    consumeTarget: null,
+    consumeStartTime: 0,
+    lastConsumeTick: 0,
+    fleeingUntil: 0
   };
 }
 
