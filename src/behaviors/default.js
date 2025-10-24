@@ -6,6 +6,28 @@ export function update(enemy, state, dtMs = 16) {
   const enemyWidth = enemy.shapeWidth * enemy.blockWidth;
   const enemyHeight = enemy.shapeHeight * enemy.blockHeight;
 
+  // General behavior: if painted recently, flee from player for a short duration
+  if (enemy.hasBeenHit) {
+    enemy.fleeingUntil = now + 1200; // flee for 1.2s after being painted
+    enemy.hasBeenHit = false;
+  }
+
+  if (enemy.fleeingUntil && now < enemy.fleeingUntil) {
+    const player = state.player;
+    const dx = enemy.x - player.x;
+    const dy = enemy.y - player.y;
+    const angle = Math.atan2(dy, dx);
+    const fleeSpeed = enemy.fastSpeed;
+    enemy.x += Math.cos(angle) * fleeSpeed;
+    enemy.y += Math.sin(angle) * fleeSpeed;
+    // Clamp to world bounds
+    enemy.x = Math.max(0, Math.min(state.worldWidth - enemyWidth, enemy.x));
+    enemy.y = Math.max(0, Math.min(state.worldHeight - enemyHeight, enemy.y));
+    // Skip other behavior while fleeing
+    if (!enemy.type) enemy.type = 'default';
+    return;
+  }
+
   // If consuming is locked, do not move; only perform minimal separation to avoid overlap
   if (enemy.consumeLocked) {
     // Minimal soft separation only

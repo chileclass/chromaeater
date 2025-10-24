@@ -151,8 +151,13 @@ export function draw() {
       const worldX = enemy.x + block.relX * enemy.blockWidth;
       const worldY = enemy.y + block.relY * enemy.blockHeight;
       ctx.fillRect(worldX, worldY, enemy.blockWidth, enemy.blockHeight);
+      // Add a noticeable border around each block to avoid fusing with background
+      ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(worldX + 0.5, worldY + 0.5, enemy.blockWidth - 1, enemy.blockHeight - 1);
     });
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    // Stronger outline for the whole enemy body
+    ctx.strokeStyle = 'rgba(0,0,0,0.7)';
     ctx.strokeRect(enemy.x, enemy.y, getEnemyWidth(enemy), getEnemyHeight(enemy));
   });
 

@@ -128,7 +128,8 @@ export function createEnemy() {
     consumeLocked: false,     // lock movement while consuming
     consumeTarget: null,      // { row, col }
     consumeStartTime: 0,
-    lastConsumeTick: 0
+    lastConsumeTick: 0,
+    fleeingUntil: 0
   };
 }
 
@@ -169,7 +170,8 @@ export async function createEnemyFromPng(url, options = {}) {
     consumeLocked: false,
     consumeTarget: null,
     consumeStartTime: 0,
-    lastConsumeTick: 0
+    lastConsumeTick: 0,
+    fleeingUntil: 0
   };
 }
 
