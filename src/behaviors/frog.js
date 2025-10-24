@@ -15,6 +15,12 @@ export function update(enemy, delta) {
   if (!enemy.jumpCount) enemy.jumpCount = 0;
   if (!enemy.nextJumpTime) enemy.nextJumpTime = 0;
 
+  // If consuming is locked, skip movement entirely but keep type assignment
+  if (enemy.consumeLocked) {
+    enemy.type = 'frog';
+    return;
+  }
+
   // Still resting
   if (enemy.restingTime > now) return;
 

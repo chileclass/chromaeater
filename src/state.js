@@ -87,12 +87,12 @@ export const state = {
 
   // Consumption behavior configuration
   consumption: {
-    initialDelayMs: 1000,     // 1s delay before boost
-    initialBoost: 0.10,       // +10% immediate boost
+    initialDelayMs: 500,      // faster for testing: 0.5s delay before boost
+    initialBoost: 0.25,       // faster for testing: +25% immediate boost
     // Given two enemy types, keep both the same as requested
     ratesByType: {            // per-second rates after boost
-      default: 0.05,
-      frog: 0.05
+      default: 0.5,           // faster for testing
+      frog: 0.5               // same as default per requirement
     },
     decayDurationMs: 5000,    // 5s linear decay to minimum
     minTouchedOpacity: 0.10   // tiles never drop below 10% once touched

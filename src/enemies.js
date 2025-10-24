@@ -125,7 +125,8 @@ export function createEnemy() {
     behavior: defaultBehaviorUpdate,
     // consumption state
     type: 'default',
-    consuming: false,
+    consumeLocked: false,     // lock movement while consuming
+    consumeTarget: null,      // { row, col }
     consumeStartTime: 0,
     lastConsumeTick: 0
   };
@@ -165,7 +166,8 @@ export async function createEnemyFromPng(url, options = {}) {
     behavior: defaultBehaviorUpdate,
     // consumption state
     type: 'default',
-    consuming: false,
+    consumeLocked: false,
+    consumeTarget: null,
     consumeStartTime: 0,
     lastConsumeTick: 0
   };

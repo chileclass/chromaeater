@@ -95,8 +95,22 @@ export function update() {
     if (!enemy.active) return;
     if (!state.enemyTileConsumption[enemy.id]) state.enemyTileConsumption[enemy.id] = new Set();
 
-    // Choose a tile to consume
-    const choice = pickTileForEnemy(enemy);
+    // Keep consuming current tile if locked and it exists
+    let choice = null;
+    if (enemy.consumeLocked && enemy.consumeTarget) {
+      const { row, col } = enemy.consumeTarget;
+      if (row >= 0 && row < state.gridRows && col >= 0 && col < state.gridCols) {
+        choice = { row, col, cell: state.backgroundGrid[row][col] };
+      }
+    }
+
+    // Otherwise pick a tile to consume
+    if (!choice) {
+      choice = pickTileForEnemy(enemy);
+      if (choice) {
+        enemy.consumeTarget = { row: choice.row, col: choice.col };
+      }
+    }
     if (!choice) return;
     const { row, col, cell } = choice;
     const tileKey = `${row},${col}`;
@@ -128,6 +142,10 @@ export function update() {
       }
       assigned.add(tileKey);
 
+      // Lock enemy movement while this tile is not full
+      enemy.consumeLocked = true;
+      enemy.consumeTarget = { row, col };
+
       // Initial delay then boost
       if (!cell.initialBoostApplied) {
         if (now - cell.consumeStartTime >= cfg.initialDelayMs) {
@@ -154,6 +172,14 @@ export function update() {
             state.whiteFullCount++;
           }
         }
+      }
+
+      // If tile is fully consumed, unlock and release claim
+      if (cell.whiteOpacity >= 1) {
+        enemy.consumeLocked = false;
+        if (cell.consumingEnemyId === enemy.id) cell.consumingEnemyId = null;
+        assigned.delete(tileKey);
+        enemy.consumeTarget = null;
       }
     }
   });
